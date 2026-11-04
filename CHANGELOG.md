@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.4 — 2026-11-04
+
+修一个致命 bug + 一个安全问题，两个都是别人实际安装时发现的。
+
+- **修（严重）：`lib/index.js` 大括号错位，7 个 `task_*` 工具根本没注册上。**
+  `if (ctx.tools…) {` 的闭合大括号提前落在了 `plugin_install` 之后，导致下面 `tool()` 全在作用域外调用，`apply()` 抛 `ReferenceError: tool is not defined` 后中断。
+  表现：页面、路由都正常（它们在抛错之前就注册完了），但 AI 侧看不到 `task_board` / `task_claim` / `task_split` / `task_assign` / `task_done` / `task_comment` / `task_create`，任务板「让 AI 分工」那条链路等于没接上。
+  修完实测：`apply()` 成功，注册 **13 个工具**（5 个 memory_* + plugin_install + 7 个 task_*）、28 条路由、3 个清理函数。
+- **修（安全）：所有路由现在先过宿主的 `connection.requestRejection(req)`。**
+  之前 28 条路由一条都没做检查，`/dsh-plugins/api/shutdown` 这类能结束进程、停用/删除插件的接口，本机任意进程都能调；浏览器里的任意网页用简单请求（`<img src="http://127.0.0.1:端口/dsh-plugins/api/shutdown">`）也能触发。
+  现在每条路由都先问 DSH 的 Host/Origin 栅栏与登录 cookie，`undefined` 放行、`401/403` 直接结束响应且不进入 handler。拿不到 `connection` 服务时放行（避免宿主没这个服务时整页打不开）。
+  实测四种情况：拒绝 → 403 且 handler 不执行；放行 → 正常；无服务 → 放行；`ctx.get` 抛错 → 放行。
+
 ## 0.2.3 — 2026-11-04
 
 - 修：`/api/updates` 不再返回「远端版本 == 本地版本」的插件。之前升级过的包会一直挂在返回里（前端比一遍后不显示，但接口数据是脏的）。
