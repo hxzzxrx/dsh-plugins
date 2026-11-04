@@ -4,8 +4,17 @@ node_modules/
 Thumbs.db
 .vscode/
 .idea/
+
+# 运行数据（含用户自己的东西，不进仓库）
 config.json
 zh-cache.json
 pending.json
 known.json
+tasks.json
+personas.json
 trash/
+
+# 凭证：任何情况下都不许提交
+.credentials*
+*.bak-login-*
+*.credentials.yaml
