@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.5 — 2026-11-04
+
+两处小修，都是真机验证时暴露的。
+
+- **修：`task_board` 等返回字符串的工具被宿主校验打回。**
+  `textOutput.schema` 写的是 `{ type: 'object' }`，但 `task_board` 返回的是纯文本，于是宿主报
+  `tool "task_board" returned invalid output: "value" must be an object`。
+  现在 schema 放开成 `{}`（任意值），`render` 里对字符串走原样、对对象走 `JSON.stringify`。
+  影响面：所有走 `textOutput` 的工具（plugin_install + 7 个 task_*）。
+- **修：停用后再启用，插件被追加到 bundles 末尾，加载顺序变了。**
+  现在停用时把原位置记进 `<DSH_HOME>/dsh-plugins/disabled-order.json`，启用时 `splice` 插回原位；位置失效（比如中间删了别的插件）才退回追加。
+  实测往返：`a,b,c` → 停用 b → `a,c` → 启用 b → `a,b,c`。
+
 ## 0.2.4 — 2026-11-04
 
 修一个致命 bug + 一个安全问题，两个都是别人实际安装时发现的。
