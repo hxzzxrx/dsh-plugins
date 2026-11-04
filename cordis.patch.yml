@@ -1,0 +1,3 @@
+- insert:
+    - id: plugins
+      name: 'dsh-plugins'

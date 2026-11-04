@@ -1,0 +1,11 @@
+node_modules/
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+config.json
+zh-cache.json
+pending.json
+known.json
+trash/
